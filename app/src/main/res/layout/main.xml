@@ -1,18 +1,100 @@
 <?xml version="1.0" encoding="utf-8"?>
-<android.support.constraint.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="calebslab.creditappraisal.MainActivity">
+    android:orientation="vertical"
+    android:layout_margin="20dp">
 
     <TextView
+        android:id="@+id/tvMain"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="■ 메인메뉴"
+        android:textSize="20dp"
+        android:textStyle="bold"
+        android:layout_marginBottom="15dp"/>
+
+    <Button
+        android:id="@+id/btSmsDay"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:text="일평균 발신/수신 SMS건수"
+        android:gravity="left|center_vertical"
+        android:background="@drawable/button_style"
+        android:layout_marginBottom="10dp"/>
+
+    <Button
+        android:id="@+id/btSmsAfternoon"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:text="시간대별 SMS 비율(오후)"
+        android:gravity="left|center_vertical"
+        android:background="@drawable/button_style"
+        android:layout_marginBottom="10dp"/>
+
+    <Button
+        android:id="@+id/btSmsEvening"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:text="시간대별 SMS 비율(저녁)"
+        android:gravity="left|center_vertical"
+        android:background="@drawable/button_style"
+        android:layout_marginBottom="10dp"/>
+
+    <Button
+        android:id="@+id/btCallCount"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:text="일별 발신/수신 전화건수"
+        android:gravity="left|center_vertical"
+        android:background="@drawable/button_style"
+        android:layout_marginBottom="10dp"/>
+
+    <Button
+        android:id="@+id/btCallAvgLength"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:text="발신/수신전화의 평균 통화 길이"
+        android:gravity="left|center_vertical"
+        android:background="@drawable/button_style"
+        android:layout_marginBottom="10dp"/>
+
+    <Button
+        android:id="@+id/btCallAvgMonth"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:text="월간 평균 통화시간"
+        android:gravity="left|center_vertical"
+        android:background="@drawable/button_style"
+        android:layout_marginBottom="10dp"/>
+
+    <Button
+        android:id="@+id/btShinhan"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20dp"
+        android:text="신한은행 월간 입출금 총액"
+        android:gravity="left|center_vertical"
+        android:background="@drawable/button_style"
+        android:layout_marginBottom="20dp"/>
+
+    <Button
+        android:id="@+id/btEnd"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Hello World!"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent" />
+        android:textSize="20dp"
+        android:text="닫기"
+        android:layout_gravity="bottom|center_horizontal"
+        android:gravity="center_horizontal|center_vertical"
+        android:background="@drawable/back_button_style" />
 
-</android.support.constraint.ConstraintLayout>
+
+</LinearLayout>
