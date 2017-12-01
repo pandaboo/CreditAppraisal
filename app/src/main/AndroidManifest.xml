@@ -2,6 +2,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="calebslab.creditappraisal">
 
+    <uses-permission android:name="android.permission.READ_SMS" />
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -16,9 +18,10 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".SmsAftAvrCnt"></activity>
-        <activity android:name=".SmsNgtAvrCnt"></activity>
+        <activity android:name=".SmsAftAvrCnt" />
+        <activity android:name=".SmsNgtAvrCnt" />
+        <activity android:name=".SmsSndRecCnt" />
+        <activity android:name=".ShMonTotAmt" />
     </application>
 
-    <uses-permission android:name="android.permission.READ_SMS"/>
 </manifest>
