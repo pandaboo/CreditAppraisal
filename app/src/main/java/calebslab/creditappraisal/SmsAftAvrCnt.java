@@ -10,10 +10,15 @@ import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.TextView;
 
+import com.github.mikephil.charting.charts.PieChart;
+
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
 public class SmsAftAvrCnt extends AppCompatActivity {
+
+    private float[] yData = {25.3f, 10.6f, 66.76f, 44.32f, 46.01f, 16.89f, 23.9f };
+    private String[] xData = {"Mitch", "Jessica", "Mohammad", "Kelsey", "Sam", "Robert", "Ashley"};
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -27,11 +32,15 @@ public class SmsAftAvrCnt extends AppCompatActivity {
 
         TextView tvToday;
         Button btList;
+        PieChart chartAfter;
 
         tvToday = (TextView) findViewById(R.id.tvToday);
         btList = (Button) findViewById(R.id.btList);
+        chartAfter = (PieChart) findViewById(R.id.chartAfter);
 
         tvToday.setText("조회기준일 : "+getDate());
+
+        gongtong.setPieChart(chartAfter, yData, xData);
 
         btList.setOnClickListener(new View.OnClickListener() {
             @Override
