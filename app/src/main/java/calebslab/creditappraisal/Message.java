@@ -7,7 +7,7 @@ public class Message {
         private String sAddress;                 //휴대폰번호
         private String sContactId;
         private String sContactId_string;
-        private String sTimestamp;              //시간
+        private long  lTimestamp;              //시간
         private String sBody;                    //문자내용
         private int   iProtocol=0;
         private int   iType=0;
@@ -54,12 +54,12 @@ public class Message {
             this.sContactId_string = contactId_string;
         }
 
-        public String getTimestamp() {
-            return sTimestamp;
+        public long getTimestamp() {
+            return lTimestamp;
         }
 
-        public void setTimestamp(String timestamp) {
-            this.sTimestamp = timestamp;
+        public void setTimestamp(long timestamp) {
+            this.lTimestamp = timestamp;
         }
 
         public String getBody() {
