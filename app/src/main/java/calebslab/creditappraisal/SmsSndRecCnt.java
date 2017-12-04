@@ -46,9 +46,10 @@ public class SmsSndRecCnt extends AppCompatActivity implements View.OnClickListe
                     projection,
                     null,
                     null,
-                    null);
+                    "date DESC");
 
             if(c.getCount() > 0) {
+
                 while (c.moveToNext()) {
 
                     Message msg = new Message(); // 따로 저는 클래스를 만들어서 담아오도록 했습니다.
@@ -94,7 +95,7 @@ public class SmsSndRecCnt extends AppCompatActivity implements View.OnClickListe
         switch (v.getId()) {
             //닫기
             case R.id.btEnd:
-                getSmsCnt();
+                finish();
                 break;
         }
     }
