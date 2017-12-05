@@ -1,5 +1,7 @@
 package calebslab.creditappraisal;
 
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.os.Environment;
 import android.support.v7.app.ActionBar;
 import android.util.Log;
@@ -16,6 +18,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.text.ParseException;
 import java.util.ArrayList;
 
 import java.text.SimpleDateFormat;
@@ -84,6 +88,40 @@ public class Gongtong {
         return lTImeMillis;
     }
 
+    /**
+     * param 값 만큼 이전 달의 첫날을 Long 형으로 리턴 밀리세컨까지 리턴
+     * @param agoMonth        : 이전달
+     * @return lTImeMillis     : 예) 1507109290727
+     */
+    public long getAgoMinDate(int agoMonth) {
+        Calendar cal = Calendar.getInstance();
+        cal.add(cal.MONTH, -agoMonth);
+        cal.set(cal.DATE, 1);
+        cal.set(cal.HOUR_OF_DAY, 00);
+        cal.set(cal.MINUTE, 00);
+        long lTImeMillis = cal.getTimeInMillis();
+        SimpleDateFormat transFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Log.d("cal", "지정일의 첫날  = " + transFormat.format(lTImeMillis));
+        return lTImeMillis;
+    }
+
+    /**
+     * param 값 만큼 이전 달의 마지막날 Long 형으로 리턴 밀리세컨까지 리턴
+     * @param agoMonth        : 이전달
+     * @return lTImeMillis     : 예) 1507109290727
+     */
+    public long getAgoMaxDate(int agoMonth) {
+        Calendar cal = Calendar.getInstance();
+        cal.add(cal.MONTH, -agoMonth);
+        cal.set(cal.DATE, cal.getActualMaximum(cal.DAY_OF_MONTH));
+        cal.set(cal.HOUR_OF_DAY, 23);
+        cal.set(cal.MINUTE, 59);
+        long lTImeMillis = cal.getTimeInMillis();
+        SimpleDateFormat transFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Log.d("cal", "지정일의 마지막 날짜  = " + transFormat.format(lTImeMillis));
+        return lTImeMillis;
+    }
+
 
     /**
      * param 값 만큼 이전 달을 String 형으로 리턴
@@ -105,5 +143,37 @@ public class Gongtong {
         return sYYYYMM;
     }
 
+    /**
+     * assets에서 properties 파일을 읽는다.
+     * @param am         : context의 AssetManager
+     * @param keyStr     : 추출할 key값
+     * @param fileName  : 파일명
+     * @return data      : key값의 매칭된 value 값
+     */
+    public String[] ReadToAssetsProperty(AssetManager am, String keyStr, String fileName) {
 
+        //property 파일
+        InputStream is = null;
+        File file = null;
+        String arrayData[] = null;
+
+        try {
+            AssetFileDescriptor fileDescriptor = am.openFd("FILE/" + fileName);
+            FileInputStream fis = null;
+            fis = fileDescriptor.createInputStream();
+
+            //Property 데이터 읽기
+            Properties props = new Properties();
+            props.load(fis);
+
+            String data = props.getProperty(keyStr, "");  //(key , default value)
+
+            if(data != null) {
+                arrayData = data.split(",");
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return arrayData;
+    }
 }

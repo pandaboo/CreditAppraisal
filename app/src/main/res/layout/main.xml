@@ -57,16 +57,6 @@
         android:layout_marginBottom="10dp"/>
 
     <Button
-        android:id="@+id/btCallAvgLength"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:textSize="20dp"
-        android:text="발신/수신전화의 평균 통화 길이"
-        android:gravity="left|center_vertical"
-        android:background="@drawable/button_style"
-        android:layout_marginBottom="10dp"/>
-
-    <Button
         android:id="@+id/btCallAvgMonth"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

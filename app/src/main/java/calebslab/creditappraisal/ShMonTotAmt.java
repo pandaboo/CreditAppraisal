@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -20,12 +22,18 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Properties;
 
-public class ShMonTotAmt extends AppCompatActivity {
+public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListener {
 
     ListView listV;
     SimpleDateFormat ymDateFormat = new SimpleDateFormat("YYYYMM");
@@ -34,12 +42,15 @@ public class ShMonTotAmt extends AppCompatActivity {
 
     HashMap<String, Integer> hInMap = new HashMap<String, Integer>();
     HashMap<String, Integer> hOutMap = new HashMap<String, Integer>();
-    String SHINHAN_NUM = "01062848986";
+    String SHINHAN_NUM[] = null;
+    int iAgoMonth = 4;      // iAgoMonth 만큼 이전 달 (4달전)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sh_mon_tot_amt);
+
+        findViewById(R.id.btEnd).setOnClickListener(this);
 
         init();
 
@@ -52,6 +63,18 @@ public class ShMonTotAmt extends AppCompatActivity {
         ActionBar actionbar = getSupportActionBar();
         Gongtong gongtong = new Gongtong();
         gongtong.Title_Bar(actionbar);
+
+        TextView textView1 = (TextView) findViewById(R.id.tvMain);
+        TextView textView2 = (TextView) findViewById(R.id.dateTv);
+        textView1.setText("■ 신한은행 " + iAgoMonth + "달간 입/출금 총액");
+        textView2.setText("조회기준일 : " + gongtong.getDate());
+
+        SHINHAN_NUM = gongtong.ReadToAssetsProperty(getApplicationContext().getAssets(), "SHINHAN_BANK_NUM", "BankCode.properties");
+
+        if(SHINHAN_NUM == null) {
+            Toast.makeText(getApplicationContext(), "은행 기본정보가 없어서 실행할 수 없습니다.", Toast.LENGTH_SHORT).show();
+            finish();
+        }
 
         dataArr.clear();
     }
@@ -68,6 +91,16 @@ public class ShMonTotAmt extends AppCompatActivity {
                 }
                 break;
             default:
+                break;
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            //닫기
+            case R.id.btEnd:
+                finish();
                 break;
         }
     }
@@ -110,8 +143,8 @@ public class ShMonTotAmt extends AppCompatActivity {
             viewHolder.outAmtTvHolder = (TextView) convertView.findViewById(R.id.outAmtTv);
 
             viewHolder.dateTvHolder.setText(dataArr.get(position).yyyymm);
-            viewHolder.inAmtTvHolder.setText(dataArr.get(position).iInAmt + " 원");
-            viewHolder.outAmtTvHolder.setText(dataArr.get(position).iOutAmt + "원");
+            viewHolder.inAmtTvHolder.setText(String.format("%, d", dataArr.get(position).iInAmt) + " 원");
+            viewHolder.outAmtTvHolder.setText(String.format("%,d", dataArr.get(position).iOutAmt) + "원");
 
             return convertView;
         }
@@ -140,11 +173,12 @@ public class ShMonTotAmt extends AppCompatActivity {
 
             Uri allMessage = Uri.parse("content://sms");
             Gongtong gongtong = new Gongtong();
-            Long lAgoDate = gongtong.getAgoDate(4);
+            Long lAgoMinDate = gongtong.getAgoMinDate(iAgoMonth);
+            Long lAgoMaxDate = gongtong.getAgoMaxDate(1);
 
             String[] projection = new String[]{"_id", "thread_id", "address", "person", "date","body", "protocol", "type"};
-            String selection = "DATE >= ?";
-            String selectionArgs[] = new String[]{String.valueOf(lAgoDate)} ;
+            String selection = "DATE >= ? AND DATE < ?";
+            String selectionArgs[] = new String[]{String.valueOf(lAgoMinDate), String.valueOf(lAgoMaxDate)} ;
 
             Cursor c = getContentResolver().query(allMessage,
                     projection,
@@ -191,46 +225,52 @@ public class ShMonTotAmt extends AppCompatActivity {
             int iInTotAmt = 0;  //입금 전체금액
             int iOutTotAmt = 0; //출금 전체금액
 
-            Log.d("JHPARK", "arrayList.size()  = " + arrayList.size());
+            Log.d("cal", "arrayList.size()  = " + arrayList.size());
 
             if(arrayList.size() > 0 ) {
+
                 for(int index=0; index<arrayList.size(); index++) {
 
                     Message messageOut = (Message) arrayList.get(index);; // 따로 저는 클래스를 만들어서 담아오도록 했습니다.
 
                     //입금 정보 확인해 보기
-                    if(messageOut.getType() == 1) {         //수신 메시지
+                    if(messageOut.getType() == 1 && messageOut.getAddress() != null) {         //수신 메시지
 
-                        if(messageOut.getAddress() != null && SHINHAN_NUM.equals(messageOut.getAddress())) {
+                        for(int ii=0; ii<SHINHAN_NUM.length; ii++) {
+                            if(SHINHAN_NUM[ii].equals(messageOut.getAddress())) {
 
-                            Log.d("JHPARK", "messageOut.getBody()" + messageOut.getBody());
+                                //Log.d("cal", "messageOut.getBody()  =" + messageOut.getBody());
 
-                            if(messageOut.getBody().indexOf("출금") > 0 || messageOut.getBody().indexOf("지급") > 0) {    //출금
+                                if(messageOut.getBody().indexOf("출금") > 0 || messageOut.getBody().indexOf("지급") > 0) {    //출금
 
-                                iTmpAmt = 0;
-                                iTmpAmt = getAmt(messageOut.getBody(), "2");
+                                    iTmpAmt = 0;
+                                    iTmpAmt = getAmt(messageOut.getBody(), "2");
 
-                                iOutTotAmt = hOutMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) == null ? 0 : hOutMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString());
-                                hOutMap.put(ymDateFormat.format(messageOut.getTimestamp()).toString(), iOutTotAmt + iTmpAmt);
+                                    iOutTotAmt = hOutMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) == null ? 0 : hOutMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString());
+                                    hOutMap.put(ymDateFormat.format(messageOut.getTimestamp()).toString(), iOutTotAmt + iTmpAmt);
 
-                                Log.d("JHPARK", "출금 messageOut.getTimestamp()).toString()" + ymDateFormat.format(messageOut.getTimestamp()).toString() );
-                                Log.d("JHPARK", "출금 hOutMap" + hOutMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) );
+                                    Log.d("cal", "출금 messageOut.getTimestamp()).toString()  =" + ymDateFormat.format(messageOut.getTimestamp()).toString() );
+                                    Log.d("cal", "출금 hOutMap  = " + hOutMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) );
 
-                            } else if(messageOut.getBody().indexOf("입금") > 0) {  // 입금
+                                } else if(messageOut.getBody().indexOf("입금") > 0) {  // 입금
 
-                                iTmpAmt = 0;
-                                iTmpAmt = getAmt(messageOut.getBody(), "1");
+                                    iTmpAmt = 0;
+                                    iTmpAmt = getAmt(messageOut.getBody(), "1");
 
-                                iInTotAmt = hInMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) == null ? 0 : hInMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString());
-                                hInMap.put(ymDateFormat.format(messageOut.getTimestamp()).toString(), iInTotAmt + iTmpAmt);
+                                    iInTotAmt = hInMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) == null ? 0 : hInMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString());
+                                    hInMap.put(ymDateFormat.format(messageOut.getTimestamp()).toString(), iInTotAmt + iTmpAmt);
+
+                                    Log.d("cal", "입금 messageOut.getTimestamp()).toString()  =" + ymDateFormat.format(messageOut.getTimestamp()).toString() );
+                                    Log.d("cal", "입금 hInMap  = " + hInMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) );
+                                }
+                            } else {
+
                             }
                         }
-                    } else if(messageOut.getType() == 2) {  //송신 메시지
-                        // 할거 없어!!!!
                     }
                 }
 
-                for (int idx = 0; idx<5; idx++) {
+                for (int idx = 1; idx<iAgoMonth+1; idx++) {
                     String sSetYearMonth = gongtong.getMonthAgoDate(idx);
                     int iInAmt = hInMap.get(sSetYearMonth) == null ? 0 : hInMap.get(sSetYearMonth);
                     int iOutAmt = hOutMap.get(sSetYearMonth) == null ? 0 : hOutMap.get(sSetYearMonth);
@@ -255,17 +295,19 @@ public class ShMonTotAmt extends AppCompatActivity {
         int iTmpIndexEnd   = 0;
         int amt     = 0;
 
+        String [] arrayStr = {"입금", "출금", "지급"};
+
         String sTmpBody = "";
         String sChkStr  = "";
 
         // 체크문자 세팅
         if("1".equals(checkDsc)) {              //입금금액 추출
-            sChkStr = "입금";
+            sChkStr = arrayStr[0];
         } else if ("2".equals(checkDsc)) {      //출금금액 추출
-            if(body.indexOf("지급") > 0) {
-                sChkStr = "지급";
-            } else if(body.indexOf("출금") > 0) {
-                sChkStr = "출금";
+            if(body.indexOf(arrayStr[1]) > 0) {
+                sChkStr = arrayStr[1];
+            } else if(body.indexOf(arrayStr[2]) > 0) {
+                sChkStr = arrayStr[2];
             }
         }
 
