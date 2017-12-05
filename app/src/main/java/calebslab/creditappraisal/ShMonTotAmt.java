@@ -4,6 +4,8 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -20,12 +22,18 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.io.BufferedReader;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.HashMap;
+import java.util.Properties;
 
-public class ShMonTotAmt extends AppCompatActivity {
+public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListener {
 
     ListView listV;
     SimpleDateFormat ymDateFormat = new SimpleDateFormat("YYYYMM");
@@ -41,6 +49,8 @@ public class ShMonTotAmt extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.sh_mon_tot_amt);
 
+        findViewById(R.id.btEnd).setOnClickListener(this);
+
         init();
 
         getSmsLog();
@@ -52,6 +62,8 @@ public class ShMonTotAmt extends AppCompatActivity {
         ActionBar actionbar = getSupportActionBar();
         Gongtong gongtong = new Gongtong();
         gongtong.Title_Bar(actionbar);
+
+        SHINHAN_NUM = gongtong.ReadToAssetsProperty(getApplicationContext().getAssets(), "SHINHAN_BANK_NUM", "BankCode.properties");
 
         dataArr.clear();
     }
@@ -68,6 +80,16 @@ public class ShMonTotAmt extends AppCompatActivity {
                 }
                 break;
             default:
+                break;
+        }
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            //닫기
+            case R.id.btEnd:
+                finish();
                 break;
         }
     }

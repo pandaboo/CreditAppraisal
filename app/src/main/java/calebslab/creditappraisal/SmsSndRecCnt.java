@@ -59,12 +59,18 @@ public class SmsSndRecCnt extends AppCompatActivity implements View.OnClickListe
 
             ArrayList arrayList = new ArrayList<Message>();
             Uri allMessage = Uri.parse("content://sms");
+
+            Gongtong gongtong = new Gongtong();
+            Long lAgoDate = gongtong.getAgoDate(4);
+
             String[] projection = new String[]{"_id", "address", "date", "type"};
+            String selection = "DATE >= ?";
+            String selectionArgs[] = new String[]{String.valueOf(lAgoDate)} ;
 
             Cursor c = getContentResolver().query(allMessage,
                     projection,
-                    null,
-                    null,
+                    selection,
+                    selectionArgs,
                     "date DESC");
 
             if(c.getCount() > 0) {

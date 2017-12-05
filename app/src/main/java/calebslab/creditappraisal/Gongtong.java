@@ -1,5 +1,7 @@
 package calebslab.creditappraisal;
 
+import android.content.res.AssetFileDescriptor;
+import android.content.res.AssetManager;
 import android.os.Environment;
 import android.support.v7.app.ActionBar;
 import android.util.Log;
@@ -16,6 +18,7 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 
 import java.text.SimpleDateFormat;
@@ -107,5 +110,32 @@ public class Gongtong {
         return sYYYYMM;
     }
 
+    /**
+     * assets에서 properties 파일을 읽는다.
+     * @param am         : context의 AssetManager
+     * @param keyStr     : 추출할 key값
+     * @param fileName  : 파일명
+     * @return data      : key값의 매칭된 value 값
+     */
+    public String ReadToAssetsProperty(AssetManager am, String keyStr, String fileName) {
 
+        //property 파일
+        InputStream is = null;
+        File file = null;
+        String data = "";
+        try {
+            AssetFileDescriptor fileDescriptor = am.openFd("FILE/" + fileName);
+            FileInputStream fis = null;
+            fis = fileDescriptor.createInputStream();
+
+            //Property 데이터 읽기
+            Properties props = new Properties();
+            props.load(fis);
+            data = props.getProperty(keyStr, "");  //(key , default value)
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return data;
+    }
 }
