@@ -18,7 +18,11 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.data.Entry;
+import com.github.mikephil.charting.highlight.Highlight;
+import com.github.mikephil.charting.listener.OnChartValueSelectedListener;
 
+import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -38,7 +42,7 @@ public class SmsAftAvrCnt extends AppCompatActivity {
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.smsafternoon);
 
-        ActionBar actionbar = getSupportActionBar();
+        final ActionBar actionbar = getSupportActionBar();
         gongtong.Title_Bar(actionbar);
 
         TextView tvToday;
@@ -53,6 +57,47 @@ public class SmsAftAvrCnt extends AppCompatActivity {
         Log.d(JJKIM, "before setPieChart");
         gongtong.setPieChart(chartAfter, getSms(), time);
         Log.d(JJKIM, "end setPieChart");
+
+        // 파이조각 클릭시 비율을 Toast로 띄워줌
+        chartAfter.setOnChartValueSelectedListener(new OnChartValueSelectedListener() {
+            @Override
+            public void onValueSelected(Entry e, Highlight h) {
+                Log.d(JJKIM, "onValueSelected: value select from chart");
+                Log.d(JJKIM, "onValueSelected: " + e.toString());
+                Log.d(JJKIM, "onValueSelected: " + h.toString());
+
+                //시간추출
+                int position1 = h.toString().indexOf("x: ");
+                Log.d(JJKIM, "position1: " + position1);
+                int position2 = h.toString().indexOf("y: ");
+                Log.d(JJKIM, "position2: " + position2);
+                int timeIndex = Integer.parseInt(h.toString().substring(position1 + 3, position2 - 4));
+                Log.d(JJKIM, "timeIndex: " + timeIndex);
+
+                // 값 추출
+                int position3 = e.toString().indexOf("y: ");
+                float count = Float.parseFloat(e.toString().substring(position3 + 3));
+                Log.d(JJKIM, "count: " + count);
+
+                //비율계산
+                float countPercent = 0.0f;
+                float totalCount = 0.0f;
+                for(int i = 0; i < smsCount.length; i++) {
+                    totalCount += smsCount[i];
+                }
+                Log.d(JJKIM, "totalCount: " + totalCount);
+                countPercent = (count/totalCount)*100;
+                DecimalFormat format = new DecimalFormat(".##");
+                String sCountPercent = format.format(countPercent);
+                Log.d(JJKIM, "countPercent: " + sCountPercent);
+                Toast.makeText(getApplicationContext(), time[timeIndex] + "\n" + count + "\n" + sCountPercent + "%", Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onNothingSelected() {
+
+            }
+        });
 
         btList.setOnClickListener(new View.OnClickListener() {
             @Override
