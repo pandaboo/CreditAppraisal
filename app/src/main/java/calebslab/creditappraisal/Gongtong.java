@@ -39,14 +39,9 @@ public class Gongtong {
         pieChart.setTransparentCircleAlpha(0);
 
         ArrayList<PieEntry> yEntrys = new ArrayList<>();
-        ArrayList<String> xEntrys = new ArrayList<>();
 
         for (int i = 0; i < yData.length; i++) {
-            yEntrys.add(new PieEntry(yData[i], i));
-        }
-
-        for (int i = 1; i < xData.length; i++) {
-            xEntrys.add(xData[i]);
+            yEntrys.add(new PieEntry(yData[i], xData[i]));
         }
 
         //Create the Data Set
@@ -64,6 +59,9 @@ public class Gongtong {
         //create pie data object
         PieData pieData = new PieData(pieDataSet);
         pieChart.setData(pieData);
+        pieChart.getDescription().setEnabled(false); //Description제거
+        pieChart.getLegend().setEnabled(false);//Legend(범례)제거
+        pieChart.animateY(1000); //1초동안 애니메이션으로 차트 등장
         pieChart.invalidate();
     }
 

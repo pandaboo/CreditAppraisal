@@ -24,6 +24,12 @@
         android:textSize="15dp"
         android:layout_marginBottom="15dp"/>
 
+    <com.github.mikephil.charting.charts.PieChart
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:id="@+id/chartNight"
+        android:layout_marginBottom="15dp"/>
+
     <Button
         android:id="@+id/btList"
         android:layout_width="wrap_content"
