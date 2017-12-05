@@ -100,8 +100,8 @@ public class Gongtong {
         cal.set(cal.HOUR_OF_DAY, 00);
         cal.set(cal.MINUTE, 00);
         long lTImeMillis = cal.getTimeInMillis();
-        //SimpleDateFormat transFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        //Log.d("cal", "지정일의 첫날  = " + transFormat.format(lTImeMillis));
+        SimpleDateFormat transFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Log.d("cal", "지정일의 첫날  = " + transFormat.format(lTImeMillis));
         return lTImeMillis;
     }
 
@@ -117,8 +117,8 @@ public class Gongtong {
         cal.set(cal.HOUR_OF_DAY, 23);
         cal.set(cal.MINUTE, 59);
         long lTImeMillis = cal.getTimeInMillis();
-        //SimpleDateFormat transFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-        //Log.d("cal", "지정일의 마지막 날짜  = " + transFormat.format(lTImeMillis));
+        SimpleDateFormat transFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        Log.d("cal", "지정일의 마지막 날짜  = " + transFormat.format(lTImeMillis));
         return lTImeMillis;
     }
 
