@@ -3,6 +3,7 @@
     package="calebslab.creditappraisal">
 
     <uses-permission android:name="android.permission.READ_SMS" />
+    <uses-permission android:name="android.permission.READ_CALL_LOG" />
 
     <application
         android:allowBackup="true"
@@ -22,6 +23,8 @@
         <activity android:name=".SmsNgtAvrCnt" />
         <activity android:name=".SmsSndRecCnt" />
         <activity android:name=".ShMonTotAmt" />
+        <activity android:name=".CallHistoryCnt" />
+        <activity android:name=".CallDurationCnt"></activity>
     </application>
 
 </manifest>
