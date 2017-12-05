@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginBottom="15dp"
-        android:text="■ 최근 30일내 일평균 SMS 건수"
+        android:text="■ 신한은행 월간 입출금 총액"
         android:textSize="20dp"
         android:textStyle="bold" />
 
