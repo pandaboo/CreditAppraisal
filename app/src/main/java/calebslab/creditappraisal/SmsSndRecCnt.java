@@ -4,12 +4,14 @@ import android.Manifest;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 
@@ -27,6 +29,23 @@ public class SmsSndRecCnt extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btEnd).setOnClickListener(this);
 
         getSmsCnt();
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        switch (requestCode) {
+            case 1:
+                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    getSmsCnt();            // 권한 허가
+                } else {
+                    // 권한 거부 (사용자가 해당권한을 거부했을때 해주어야 할 동작을 수행합니다)
+                    Toast.makeText(getApplicationContext(), "SMS 읽기권한이 없어서 실행할 수 없습니다.", Toast.LENGTH_SHORT).show();
+                }
+                break;
+            default:
+                break;
+        }
     }
 
     private void getSmsCnt() {
@@ -61,7 +80,7 @@ public class SmsSndRecCnt extends AppCompatActivity implements View.OnClickListe
                     msg.setAddress(address);
 
                     long timestamp = c.getLong(2);
-                    msg.setTimestamp(String.valueOf(timestamp));
+                    msg.setTimestamp(timestamp);
 
                     int type = c.getInt(3);
                     msg.setType(type);

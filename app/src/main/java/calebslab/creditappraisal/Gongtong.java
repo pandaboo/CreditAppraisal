@@ -1,6 +1,8 @@
 package calebslab.creditappraisal;
 
+import android.os.Environment;
 import android.support.v7.app.ActionBar;
+import android.util.Log;
 
 
 import com.github.mikephil.charting.charts.PieChart;
@@ -10,10 +12,16 @@ import com.github.mikephil.charting.data.PieDataSet;
 import com.github.mikephil.charting.data.PieEntry;
 import com.github.mikephil.charting.utils.ColorTemplate;
 
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
+import java.util.Properties;
 
 import calebslab.creditappraisal.R;
 
@@ -64,6 +72,40 @@ public class Gongtong {
         long mNow = System.currentTimeMillis();
         Date mDate = new Date(mNow);
         return dFormat.format(mDate);
-
     }
+
+    /**
+     * param 값 만큼 이전 달을 Long 형으로 리턴 밀리세컨까지 리턴
+     * @param agoMonth        : 이전달
+     * @return lTImeMillis     : 예) 1507109290727
+     */
+    public long getAgoDate(int agoMonth) {
+        Calendar cal = Calendar.getInstance();
+        cal.add(cal.MONTH, -agoMonth);
+        long lTImeMillis = cal.getTimeInMillis();
+        return lTImeMillis;
+    }
+
+
+    /**
+     * param 값 만큼 이전 달을 String 형으로 리턴
+     * @param agoMonth        : 이전달
+     * @return sYYYYMM : 예) 201701
+     */
+    public String getMonthAgoDate(int agoMonth) {
+        Calendar cal = Calendar.getInstance();
+        cal.add(cal.MONTH, -agoMonth);         // i개월 전
+
+        String sYYYYMM = "";
+        int nMonth = cal.get(cal.MONTH)+1;
+
+        if(nMonth < 10) {
+            sYYYYMM = String.valueOf(cal.get(cal.YEAR)) + "0" + String.valueOf(cal.get(cal.MONTH)+1);
+        } else {
+            sYYYYMM = String.valueOf(cal.get(cal.YEAR)) + String.valueOf(cal.get(cal.MONTH)+1);
+        }
+        return sYYYYMM;
+    }
+
+
 }
