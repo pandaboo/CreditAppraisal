@@ -43,6 +43,7 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
     HashMap<String, Integer> hInMap = new HashMap<String, Integer>();
     HashMap<String, Integer> hOutMap = new HashMap<String, Integer>();
     String SHINHAN_NUM[] = null;
+    int iAgoMonth = 4;      // iAgoMonth 만큼 이전 달 (4달전)
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -62,6 +63,11 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
         ActionBar actionbar = getSupportActionBar();
         Gongtong gongtong = new Gongtong();
         gongtong.Title_Bar(actionbar);
+
+        TextView textView1 = (TextView) findViewById(R.id.tvMain);
+        TextView textView2 = (TextView) findViewById(R.id.dateTv);
+        textView1.setText("■ 신한은행 " + iAgoMonth + "달간 입/출금 총액");
+        textView2.setText("조회기준일 : " + gongtong.getDate());
 
         SHINHAN_NUM = gongtong.ReadToAssetsProperty(getApplicationContext().getAssets(), "SHINHAN_BANK_NUM", "BankCode.properties");
 
@@ -137,8 +143,8 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
             viewHolder.outAmtTvHolder = (TextView) convertView.findViewById(R.id.outAmtTv);
 
             viewHolder.dateTvHolder.setText(dataArr.get(position).yyyymm);
-            viewHolder.inAmtTvHolder.setText(dataArr.get(position).iInAmt + " 원");
-            viewHolder.outAmtTvHolder.setText(dataArr.get(position).iOutAmt + "원");
+            viewHolder.inAmtTvHolder.setText(String.format("%, d", dataArr.get(position).iInAmt) + " 원");
+            viewHolder.outAmtTvHolder.setText(String.format("%,d", dataArr.get(position).iOutAmt) + "원");
 
             return convertView;
         }
@@ -167,8 +173,8 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
 
             Uri allMessage = Uri.parse("content://sms");
             Gongtong gongtong = new Gongtong();
-            Long lAgoMinDate = gongtong.getAgoDate(4);
-            Long lAgoMaxDate = gongtong.getAgoDate(1);
+            Long lAgoMinDate = gongtong.getAgoMinDate(iAgoMonth);
+            Long lAgoMaxDate = gongtong.getAgoMaxDate(1);
 
             String[] projection = new String[]{"_id", "thread_id", "address", "person", "date","body", "protocol", "type"};
             String selection = "DATE >= ? AND DATE < ?";
@@ -244,7 +250,7 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
                                     hOutMap.put(ymDateFormat.format(messageOut.getTimestamp()).toString(), iOutTotAmt + iTmpAmt);
 
                                     Log.d("cal", "출금 messageOut.getTimestamp()).toString()  =" + ymDateFormat.format(messageOut.getTimestamp()).toString() );
-                                    Log.d("cal", "출금 hOutMap  =" + hOutMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) );
+                                    Log.d("cal", "출금 hOutMap  = " + hOutMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) );
 
                                 } else if(messageOut.getBody().indexOf("입금") > 0) {  // 입금
 
@@ -255,7 +261,7 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
                                     hInMap.put(ymDateFormat.format(messageOut.getTimestamp()).toString(), iInTotAmt + iTmpAmt);
 
                                     Log.d("cal", "입금 messageOut.getTimestamp()).toString()  =" + ymDateFormat.format(messageOut.getTimestamp()).toString() );
-                                    Log.d("cal", "입금 hInMap  =" + hInMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) );
+                                    Log.d("cal", "입금 hInMap  = " + hInMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) );
                                 }
                             } else {
 
@@ -264,7 +270,7 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
                     }
                 }
 
-                for (int idx = 0; idx<5; idx++) {
+                for (int idx = 1; idx<iAgoMonth+1; idx++) {
                     String sSetYearMonth = gongtong.getMonthAgoDate(idx);
                     int iInAmt = hInMap.get(sSetYearMonth) == null ? 0 : hInMap.get(sSetYearMonth);
                     int iOutAmt = hOutMap.get(sSetYearMonth) == null ? 0 : hOutMap.get(sSetYearMonth);
@@ -289,19 +295,19 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
         int iTmpIndexEnd   = 0;
         int amt     = 0;
 
-        String [] kkk = {"입금", "출금", "지급"};
+        String [] arrayStr = {"입금", "출금", "지급"};
 
         String sTmpBody = "";
         String sChkStr  = "";
 
         // 체크문자 세팅
         if("1".equals(checkDsc)) {              //입금금액 추출
-            sChkStr = kkk[0];
+            sChkStr = arrayStr[0];
         } else if ("2".equals(checkDsc)) {      //출금금액 추출
-            if(body.indexOf(kkk[1]) > 0) {
-                sChkStr = kkk[1];
-            } else if(body.indexOf(kkk[2]) > 0) {
-                sChkStr = kkk[2];
+            if(body.indexOf(arrayStr[1]) > 0) {
+                sChkStr = arrayStr[1];
+            } else if(body.indexOf(arrayStr[2]) > 0) {
+                sChkStr = arrayStr[2];
             }
         }
 

@@ -25,7 +25,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         findViewById(R.id.btSmsAfternoon).setOnClickListener(this);
         findViewById(R.id.btSmsNight).setOnClickListener(this);
         findViewById(R.id.btCallCount).setOnClickListener(this);
-        findViewById(R.id.btCallAvgLength).setOnClickListener(this);
         findViewById(R.id.btCallAvgMonth).setOnClickListener(this);
         findViewById(R.id.btShinhan).setOnClickListener(this);
         findViewById(R.id.btEnd).setOnClickListener(this);
@@ -60,7 +59,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                 break;
 
             //발신/수신 전화의 월간 평균 통화시간
-            case R.id.btCallAvgLength:
+            case R.id.btCallAvgMonth:
                 break;
 
             //신한은행 월간 입출금 총액
