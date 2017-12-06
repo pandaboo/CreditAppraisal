@@ -15,4 +15,16 @@ public class BankInOutData {
         this.iInAmt = iInAmt;
         this.iOutAmt = iOutAmt;
     }
+
+    public int getInAmt() {
+        return iInAmt;
+    }
+
+    public int getOutAmt() {
+        return iOutAmt;
+    }
+
+    public String getDate() {
+        return yyyymm;
+    }
 }

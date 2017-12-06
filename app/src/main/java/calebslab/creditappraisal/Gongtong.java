@@ -99,6 +99,7 @@ public class Gongtong {
         cal.set(cal.DATE, 1);
         cal.set(cal.HOUR_OF_DAY, 00);
         cal.set(cal.MINUTE, 00);
+        cal.set(cal.SECOND, 01);
         long lTImeMillis = cal.getTimeInMillis();
         SimpleDateFormat transFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Log.d("cal", "지정일의 첫날  = " + transFormat.format(lTImeMillis));
@@ -116,6 +117,7 @@ public class Gongtong {
         cal.set(cal.DATE, cal.getActualMaximum(cal.DAY_OF_MONTH));
         cal.set(cal.HOUR_OF_DAY, 23);
         cal.set(cal.MINUTE, 59);
+        cal.set(cal.SECOND, 59);
         long lTImeMillis = cal.getTimeInMillis();
         SimpleDateFormat transFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         Log.d("cal", "지정일의 마지막 날짜  = " + transFormat.format(lTImeMillis));
@@ -176,4 +178,24 @@ public class Gongtong {
         }
         return arrayData;
     }
+
+    /**
+     *
+     * @param str      : 숫자형식 체크
+     * @return result    : true, false
+     */
+    public boolean isOnlyDigitChk(String str) {
+
+        boolean result = false;
+        if (str == null || "".equals(str)) return false;
+
+        String filterdStr = str.replaceAll("[0-9]", "");
+
+        if (filterdStr.length() == 0) {
+            return true;
+        } else {
+            return false;
+        }
+    }
+
 }
