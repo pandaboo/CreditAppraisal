@@ -10,7 +10,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
-        android:text="■ 최근 30일간 일별 발신수신 전화건수"
+        android:text="■ 최근 30일간 일별 발신/수신 전화건수"
         android:textSize="20dp"
         android:gravity="left"
         android:textStyle="bold"

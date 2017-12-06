@@ -125,7 +125,7 @@ public class CallDurationCnt extends AppCompatActivity {
             Cursor cursor = getContentResolver().query(
                     CallLog.Calls.CONTENT_URI,
                     projection
-                    ,"duration >= 0 AND ("+ minDateLong +" <= date <= "+ maxDateLong+ ")"
+                    ,"duration >= 30 AND ("+ minDateLong +" <= date <= "+ maxDateLong+ ")"
                     ,null
                     ,null
 
@@ -197,13 +197,15 @@ public class CallDurationCnt extends AppCompatActivity {
                 String keyDate = treeMapIter.next();
                 String yyyy = keyDate.substring(0,4);
                 String mm = keyDate.substring(4,6);
-                //yyyyMM 형식을 yyyy-MM 으로 변환
+
+
+
                 //초 단위 시간을 분으로 환산
                 int iValue = (treeMap.get(keyDate).getInDuration()% 3600)/60;
                 int oValue = (treeMap.get(keyDate).getOutDuration()% 3600)/60;
 
                 Log.d("start","----------------------------------------");
-                Log.d("date",yyyy+"년 "+mm+"월");
+//                Log.d("date",yyyy+"년 "+mm+"월");
                 Log.d("value","수신 시간 :"+ iValue+" 분, 발신 시간 :"+oValue+" 분");
 
                 TableRow tableRow = new TableRow(this);
@@ -218,7 +220,7 @@ public class CallDurationCnt extends AppCompatActivity {
                 textView2.setGravity(Gravity.CENTER);
                 textView3.setGravity(Gravity.CENTER);
 
-                textView1.setText(yyyy+"년 "+mm+"월");
+                textView1.setText(yyyy+"-"+mm);
                 textView2.setText(Integer.toString(oValue)+"분");
                 textView3.setText(Integer.toString(iValue)+"분");
 

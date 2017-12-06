@@ -36,8 +36,7 @@ public class CallHistoryCnt extends AppCompatActivity {
         setContentView(R.layout.call_histroy_cnt);
 
         ActionBar actionbar = getSupportActionBar();
-        Gongtong gongtong = new Gongtong();
-        gongtong.Title_Bar(actionbar);
+        gt.Title_Bar(actionbar);
 
         TextView toDate = findViewById(R.id.toDate);
 
@@ -100,13 +99,10 @@ public class CallHistoryCnt extends AppCompatActivity {
             };
 
             // 통화시간이 30초이상 , 최근 30일간의 통화내역 조회
-            // * duration : 통화시간 (초)
-            // * date : 통화가 발생한 날짜 (yyyy-MM-dd)\
-            // * strDate2 : 현재일자로부터 30일 이전 날짜 (조회 시작 기준일)
             Cursor cursor = getContentResolver().query(
                     CallLog.Calls.CONTENT_URI,
                     projection
-                    , "duration >= 5 AND date >= " + qDate
+                    , "duration >= 30 AND date >= " + qDate
                     , null
                     , null
 
@@ -163,12 +159,7 @@ public class CallHistoryCnt extends AppCompatActivity {
                     int iValue = treeMap.get(key).getInComing();
                     int oValue = treeMap.get(key).getOutGoing();
 
-                    String yyyy = key.substring(0, 4);
-                    String mm = key.substring(5, 7);
-                    String dd = key.substring(9, 10);
-
                     Log.d("start", "----------------------------------------");
-                    Log.d("key:", yyyy + "년 " + mm + "월 " + dd + "일");
                     Log.d("value", "수신 :" + iValue + ",발신 :" + oValue);
 
                     TableRow tableRow = new TableRow(this);
@@ -183,7 +174,7 @@ public class CallHistoryCnt extends AppCompatActivity {
                     textView2.setGravity(Gravity.CENTER);
                     textView3.setGravity(Gravity.CENTER);
 
-                    textView1.setText(yyyy + "년 " + mm + "월 " + dd + "일");
+                    textView1.setText(key);
                     textView2.setText(Integer.toString(oValue) + "건");
                     textView3.setText(Integer.toString(iValue) + "건");
 
@@ -193,6 +184,7 @@ public class CallHistoryCnt extends AppCompatActivity {
                     textView1.setLayoutParams(tvPar);
                     textView2.setLayoutParams(tvPar);
                     textView3.setLayoutParams(tvPar);
+
 
                     tableRow.addView(textView1);
                     tableRow.addView(textView2);
