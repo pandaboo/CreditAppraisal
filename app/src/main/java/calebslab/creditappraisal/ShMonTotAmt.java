@@ -220,7 +220,7 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
                 int type = c.getInt(7);
                 msg.setType(type);
 
-                arrayList.add(msg); //이부분은 제가 arraylist에 담으려고 하기떄문에 추가된부분이며 수정가능합니다.
+                arrayList.add(msg);
 
             }
 

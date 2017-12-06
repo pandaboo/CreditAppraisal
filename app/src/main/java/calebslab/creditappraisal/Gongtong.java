@@ -182,7 +182,7 @@ public class Gongtong {
     /**
      *
      * @param str      : 숫자형식 체크
-     * @return result    : true, false
+     * @return  true or false
      */
     public boolean isOnlyDigitChk(String str) {
 

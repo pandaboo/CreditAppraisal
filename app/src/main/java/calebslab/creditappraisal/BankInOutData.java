@@ -1,9 +1,5 @@
 package calebslab.creditappraisal;
 
-/**
- * Created by JH on 2017-12-04.
- */
-
 public class BankInOutData {
 
     public String yyyymm = "";
