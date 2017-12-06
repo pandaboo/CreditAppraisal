@@ -4,8 +4,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.content.res.AssetFileDescriptor;
-import android.content.res.AssetManager;
 import android.database.Cursor;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -22,28 +20,28 @@ import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
 
-import java.io.BufferedReader;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Properties;
 
 public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListener {
 
     ListView listV;
-    SimpleDateFormat ymDateFormat = new SimpleDateFormat("YYYYMM");
+    SimpleDateFormat ymDateFormat = new SimpleDateFormat("yyyyMM");
     ArrayList arrayList = new ArrayList <Message> ();
     ArrayList<BankInOutData> dataArr = new ArrayList<>();
 
     HashMap<String, Integer> hInMap = new HashMap<String, Integer>();
     HashMap<String, Integer> hOutMap = new HashMap<String, Integer>();
+
+    HashMap<String, BankInOutData> hTestMap = new HashMap<String,  BankInOutData>();
+
+    Gongtong gongtong = new Gongtong();
+
     String SHINHAN_NUM[] = null;
-    int iAgoMonth = 4;      // iAgoMonth 만큼 이전 달 (4달전)
+    int IN_OUT_AMT_TERM = 0;
+    int AGO_MONTH = 0;      // iAgoMonth 만큼 이전 달 (4달전)
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -61,22 +59,21 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
     private void init() {
 
         ActionBar actionbar = getSupportActionBar();
-        Gongtong gongtong = new Gongtong();
+
         gongtong.Title_Bar(actionbar);
+        SHINHAN_NUM = gongtong.ReadToAssetsProperty(getApplicationContext().getAssets(), "SHINHAN_NUM", "code.properties");
+        IN_OUT_AMT_TERM = Integer.parseInt(gongtong.ReadToAssetsProperty(getApplicationContext().getAssets(), "IN_OUT_AMT_TERM", "code.properties")[0]);
+        AGO_MONTH = IN_OUT_AMT_TERM - 1;
+        dataArr.clear();
+
+        if(SHINHAN_NUM == null) {
+            noData("은행 기본정보가 없어서 실행할 수 없습니다.");
+        }
 
         TextView textView1 = (TextView) findViewById(R.id.tvMain);
         TextView textView2 = (TextView) findViewById(R.id.dateTv);
-        textView1.setText("■ 신한은행 " + iAgoMonth + "달간 입/출금 총액");
+        textView1.setText("■ 최근 신한은행 " + IN_OUT_AMT_TERM + "달간 입/출금 총액");
         textView2.setText("조회기준일 : " + gongtong.getDate());
-
-        SHINHAN_NUM = gongtong.ReadToAssetsProperty(getApplicationContext().getAssets(), "SHINHAN_BANK_NUM", "BankCode.properties");
-
-        if(SHINHAN_NUM == null) {
-            Toast.makeText(getApplicationContext(), "은행 기본정보가 없어서 실행할 수 없습니다.", Toast.LENGTH_SHORT).show();
-            finish();
-        }
-
-        dataArr.clear();
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -142,7 +139,7 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
             viewHolder.inAmtTvHolder = (TextView) convertView.findViewById(R.id.inAmtTv);
             viewHolder.outAmtTvHolder = (TextView) convertView.findViewById(R.id.outAmtTv);
 
-            viewHolder.dateTvHolder.setText(dataArr.get(position).yyyymm);
+            viewHolder.dateTvHolder.setText(dataArr.get(position).yyyymm.substring(0,4) + "년 " + dataArr.get(position).yyyymm.substring(4) + "월");
             viewHolder.inAmtTvHolder.setText(String.format("%, d", dataArr.get(position).iInAmt) + " 원");
             viewHolder.outAmtTvHolder.setText(String.format("%,d", dataArr.get(position).iOutAmt) + "원");
 
@@ -172,19 +169,25 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
 
 
             Uri allMessage = Uri.parse("content://sms");
-            Gongtong gongtong = new Gongtong();
-            Long lAgoMinDate = gongtong.getAgoMinDate(iAgoMonth);
-            Long lAgoMaxDate = gongtong.getAgoMaxDate(1);
+            Long lAgoMinDate = gongtong.getAgoMinDate(AGO_MONTH);
+            //Long lAgoMaxDate = gongtong.getAgoMaxDate(1);
 
             String[] projection = new String[]{"_id", "thread_id", "address", "person", "date","body", "protocol", "type"};
-            String selection = "DATE >= ? AND DATE < ?";
-            String selectionArgs[] = new String[]{String.valueOf(lAgoMinDate), String.valueOf(lAgoMaxDate)} ;
+            //String selection = "DATE >= ? AND DATE < ?";
+            String selection = "DATE >= ?";
+            String selectionArgs[] = new String[]{String.valueOf(lAgoMinDate)} ;
+            //String selectionArgs[] = new String[]{String.valueOf(lAgoMinDate), String.valueOf(lAgoMaxDate)} ;
 
             Cursor c = getContentResolver().query(allMessage,
                     projection,
                     selection,
                     selectionArgs,
                     null);
+
+            if(c.getCount()==0) {
+                noData("문자내역이 없어서 거래를 할 수 없습니다.");
+                return;
+            }
 
             while (c.moveToNext()) {
 
@@ -217,13 +220,13 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
                 int type = c.getInt(7);
                 msg.setType(type);
 
-                arrayList.add(msg); //이부분은 제가 arraylist에 담으려고 하기떄문에 추가된부분이며 수정가능합니다.
+                arrayList.add(msg);
 
             }
 
-            int iTmpAmt   = 0;
-            int iInTotAmt = 0;  //입금 전체금액
-            int iOutTotAmt = 0; //출금 전체금액
+
+            int iTmpAmt = 0;
+            int iCnt = 0;
 
             Log.d("cal", "arrayList.size()  = " + arrayList.size());
 
@@ -237,28 +240,37 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
                     if(messageOut.getType() == 1 && messageOut.getAddress() != null) {         //수신 메시지
 
                         for(int ii=0; ii<SHINHAN_NUM.length; ii++) {
+
                             if(SHINHAN_NUM[ii].equals(messageOut.getAddress())) {
 
-                                //Log.d("cal", "messageOut.getBody()  =" + messageOut.getBody());
-
                                 if(messageOut.getBody().indexOf("출금") > 0 || messageOut.getBody().indexOf("지급") > 0) {    //출금
-
+                                    iCnt++;
                                     iTmpAmt = 0;
                                     iTmpAmt = getAmt(messageOut.getBody(), "2");
 
-                                    iOutTotAmt = hOutMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) == null ? 0 : hOutMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString());
-                                    hOutMap.put(ymDateFormat.format(messageOut.getTimestamp()).toString(), iOutTotAmt + iTmpAmt);
+                                    BankInOutData bankOutData = null;
+                                    if(hTestMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) != null) {
+                                        bankOutData = hTestMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString());
+                                        hTestMap.put(ymDateFormat.format(messageOut.getTimestamp()).toString(), new BankInOutData (ymDateFormat.format(messageOut.getTimestamp()).toString(), bankOutData.getInAmt(), bankOutData.getOutAmt()+ iTmpAmt) );
+                                    } else {
+                                        hTestMap.put(ymDateFormat.format(messageOut.getTimestamp()).toString(), new BankInOutData (ymDateFormat.format(messageOut.getTimestamp()).toString(), 0, iTmpAmt));
+                                    }
 
                                     Log.d("cal", "출금 messageOut.getTimestamp()).toString()  =" + ymDateFormat.format(messageOut.getTimestamp()).toString() );
                                     Log.d("cal", "출금 hOutMap  = " + hOutMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) );
 
                                 } else if(messageOut.getBody().indexOf("입금") > 0) {  // 입금
-
+                                    iCnt++;
                                     iTmpAmt = 0;
                                     iTmpAmt = getAmt(messageOut.getBody(), "1");
 
-                                    iInTotAmt = hInMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) == null ? 0 : hInMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString());
-                                    hInMap.put(ymDateFormat.format(messageOut.getTimestamp()).toString(), iInTotAmt + iTmpAmt);
+                                    BankInOutData bankOutData = null;
+                                    if(hTestMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) != null) {
+                                        bankOutData = hTestMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString());
+                                        hTestMap.put(ymDateFormat.format(messageOut.getTimestamp()).toString(), new BankInOutData (ymDateFormat.format(messageOut.getTimestamp()).toString(), bankOutData.getInAmt() + iTmpAmt, bankOutData.getOutAmt()));
+                                    } else {
+                                        hTestMap.put(ymDateFormat.format(messageOut.getTimestamp()).toString(), new BankInOutData (ymDateFormat.format(messageOut.getTimestamp()).toString(), iTmpAmt, 0));
+                                    }
 
                                     Log.d("cal", "입금 messageOut.getTimestamp()).toString()  =" + ymDateFormat.format(messageOut.getTimestamp()).toString() );
                                     Log.d("cal", "입금 hInMap  = " + hInMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) );
@@ -270,17 +282,30 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
                     }
                 }
 
-                for (int idx = 1; idx<iAgoMonth+1; idx++) {
+                if(iCnt == 0 ) {
+                    noData("은행에 대한 입출금 거래내역이 없어서 실행할 수 없습니다.");
+                    return;
+                }
+
+                // Adapter에 데이터를 Set 하기 위해서 arrayList에 입출금 내역이 저장된 class를 매핑해줌.
+                for (int idx = 0; idx<IN_OUT_AMT_TERM; idx++) {
                     String sSetYearMonth = gongtong.getMonthAgoDate(idx);
-                    int iInAmt = hInMap.get(sSetYearMonth) == null ? 0 : hInMap.get(sSetYearMonth);
-                    int iOutAmt = hOutMap.get(sSetYearMonth) == null ? 0 : hOutMap.get(sSetYearMonth);
-                    dataArr.add(new BankInOutData(sSetYearMonth, iInAmt, iOutAmt));
+                    if(hTestMap.get(sSetYearMonth) == null) {
+                        dataArr.add(new BankInOutData(sSetYearMonth, 0, 0));
+                    } else {
+                        dataArr.add(hTestMap.get(sSetYearMonth));
+                    }
                 }
             }
         }
         MyAdapter adapter = new MyAdapter(this);
         listV = (ListView) findViewById(R.id.listTv);
         listV.setAdapter(adapter);
+    }
+
+    private void noData(String msg) {
+        Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
+        finish();
     }
 
     /**
@@ -316,9 +341,13 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
             iTmpIndexStart = body.indexOf(sChkStr);
             sTmpBody = body.substring(iTmpIndexStart + sChkStr.length());
             iTmpIndexEnd = sTmpBody.indexOf("원");
-            amt = Integer.parseInt(sTmpBody.substring(0, iTmpIndexEnd).replace(",", "").trim());
+
+            if(gongtong.isOnlyDigitChk(sTmpBody.substring(0, iTmpIndexEnd).replace(",", "").trim())){
+                amt = Integer.parseInt(sTmpBody.substring(0, iTmpIndexEnd).replace(",", "").trim());
+            }
         }
         return amt;
     }
+
 
 }
