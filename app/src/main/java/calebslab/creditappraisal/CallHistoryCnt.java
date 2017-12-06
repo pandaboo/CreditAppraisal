@@ -33,7 +33,7 @@ public class CallHistoryCnt extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.call_histroy);
+        setContentView(R.layout.call_histroy_cnt);
 
         ActionBar actionbar = getSupportActionBar();
         Gongtong gongtong = new Gongtong();
@@ -46,6 +46,7 @@ public class CallHistoryCnt extends AppCompatActivity {
         toDate.setText("조회 기준일 : " +gt.getDate());
 
         getCallLog();
+
     }
 
     @Override
@@ -105,9 +106,9 @@ public class CallHistoryCnt extends AppCompatActivity {
             Cursor cursor = getContentResolver().query(
                     CallLog.Calls.CONTENT_URI,
                     projection
-                    ,"duration >= 5 AND date >= "+ qDate
-                    ,null
-                    ,null
+                    , "duration >= 5 AND date >= " + qDate
+                    , null
+                    , null
 
             );
             // 권한이 존재하면 통화내역을 타입별로 구분하여 callHashMap 에 저장
@@ -120,26 +121,26 @@ public class CallHistoryCnt extends AppCompatActivity {
                     String cdate = dateFormat.format(cursor.getLong(0));
                     //columnIndex : 1 (수신) , 2 (발신)
 
-                    switch (cursor.getInt(1)){
+                    switch (cursor.getInt(1)) {
                         case 1:
-                            if(callLogHashMap.get(cdate)!= null){
+                            if (callLogHashMap.get(cdate) != null) {
                                 Call call = callLogHashMap.get(cdate);
-                                call.setInComing(call.getInComing()+1);
+                                call.setInComing(call.getInComing() + 1);
                                 break;
-                            }else if(callLogHashMap.get(cdate)== null){
-                                Call call = new Call(1,0,0,0);
-                                callLogHashMap.put(cdate,call);
+                            } else if (callLogHashMap.get(cdate) == null) {
+                                Call call = new Call(1, 0, 0, 0);
+                                callLogHashMap.put(cdate, call);
                                 break;
                             }
 
                         case 2:
-                            if(callLogHashMap.get(cdate)!=null){
+                            if (callLogHashMap.get(cdate) != null) {
                                 Call call = callLogHashMap.get(cdate);
-                                call.setOutGoing(call.getOutGoing()+1);
+                                call.setOutGoing(call.getOutGoing() + 1);
                                 break;
-                            }else if(callLogHashMap.get(cdate)==null){
-                                Call call = new Call(0,1,0,0);
-                                callLogHashMap.put(cdate,call);
+                            } else if (callLogHashMap.get(cdate) == null) {
+                                Call call = new Call(0, 1, 0, 0);
+                                callLogHashMap.put(cdate, call);
                             }
 
 
@@ -155,53 +156,68 @@ public class CallHistoryCnt extends AppCompatActivity {
             //트리맵을 이용하여 Key값(날짜)를 기준으로 정렬 및 레이아웃에 append
             TreeMap<String, Call> treeMap = new TreeMap<>(callLogHashMap);
             Iterator<String> treeMapIter = treeMap.keySet().iterator();
+            if (treeMapIter.hasNext() ==true) {
+                while (treeMapIter.hasNext()) {
 
-            while( treeMapIter.hasNext()) {
+                    String key = treeMapIter.next();
+                    int iValue = treeMap.get(key).getInComing();
+                    int oValue = treeMap.get(key).getOutGoing();
 
-                String key = treeMapIter.next();
-                int iValue = treeMap.get(key).getInComing();
-                int oValue = treeMap.get(key).getOutGoing();
+                    String yyyy = key.substring(0, 4);
+                    String mm = key.substring(5, 7);
+                    String dd = key.substring(9, 10);
 
-                String yyyy = key.substring(0,4);
-                String mm = key.substring(5,7);
-                String dd = key.substring(9,10);
+                    Log.d("start", "----------------------------------------");
+                    Log.d("key:", yyyy + "년 " + mm + "월 " + dd + "일");
+                    Log.d("value", "수신 :" + iValue + ",발신 :" + oValue);
 
-                Log.d("start","----------------------------------------");
-                Log.d("key:",yyyy+"년 "+mm+"월 "+dd+"일");
-                Log.d("value","수신 :"+ iValue+",발신 :"+oValue);
+                    TableRow tableRow = new TableRow(this);
+                    TextView textView1 = new TextView(this);
+                    TextView textView2 = new TextView(this);
+                    TextView textView3 = new TextView(this);
 
+                    textView1.setBackgroundResource(R.drawable.border);
+                    textView2.setBackgroundResource(R.drawable.border);
+                    textView3.setBackgroundResource(R.drawable.border);
+                    textView1.setGravity(Gravity.CENTER);
+                    textView2.setGravity(Gravity.CENTER);
+                    textView3.setGravity(Gravity.CENTER);
+
+                    textView1.setText(yyyy + "년 " + mm + "월 " + dd + "일");
+                    textView2.setText(Integer.toString(oValue) + "건");
+                    textView3.setText(Integer.toString(iValue) + "건");
+
+
+                    LinearLayout.LayoutParams tvPar = new TableRow.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+
+                    textView1.setLayoutParams(tvPar);
+                    textView2.setLayoutParams(tvPar);
+                    textView3.setLayoutParams(tvPar);
+
+                    tableRow.addView(textView1);
+                    tableRow.addView(textView2);
+                    tableRow.addView(textView3);
+                    targetTable.addView(tableRow);
+
+
+                }
+
+            }else {
                 TableRow tableRow = new TableRow(this);
                 TextView textView1 = new TextView(this);
-                TextView textView2 = new TextView(this);
-                TextView textView3= new TextView(this);
-
                 textView1.setBackgroundResource(R.drawable.border);
-                textView2.setBackgroundResource(R.drawable.border);
-                textView3.setBackgroundResource(R.drawable.border);
                 textView1.setGravity(Gravity.CENTER);
-                textView2.setGravity(Gravity.CENTER);
-                textView3.setGravity(Gravity.CENTER);
+                textView1.setText("데이터가 없습니다");
 
-                textView1.setText(yyyy+"년 "+mm+"월 "+dd+"일");
-                textView2.setText(Integer.toString(oValue)+"건");
-                textView3.setText(Integer.toString(iValue)+"건");
-
-
-                LinearLayout.LayoutParams tvPar = new TableRow.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+                LinearLayout.LayoutParams tvPar = new TableRow.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 3f);
 
                 textView1.setLayoutParams(tvPar);
-                textView2.setLayoutParams(tvPar);
-                textView3.setLayoutParams(tvPar);
-
                 tableRow.addView(textView1);
-                tableRow.addView(textView2);
-                tableRow.addView(textView3);
                 targetTable.addView(tableRow);
-
-
             }
-
         }
+
+
     }
 
 }

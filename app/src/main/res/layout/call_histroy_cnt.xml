@@ -2,16 +2,18 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:layout_margin="20dp">
 
     <TextView
         android:id="@+id/title"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
-        android:text="최근 30일간 일별 발신수신 전화건수"
+        android:text="■ 최근 30일간 일별 발신수신 전화건수"
         android:textSize="20dp"
-        android:gravity="center"
+        android:gravity="left"
+        android:textStyle="bold"
         />
 
     <TextView
