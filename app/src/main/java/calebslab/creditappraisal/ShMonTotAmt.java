@@ -202,7 +202,6 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
                 msg.setThreadId(String.valueOf(threadId));
 
                 String address = c.getString(2);
-                //Log.d("cal", "address = " + address);
                 msg.setAddress(address);
 
                 long contactId = c.getLong(3);
