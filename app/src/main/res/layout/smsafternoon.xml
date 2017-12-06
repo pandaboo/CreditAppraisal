@@ -11,7 +11,7 @@
         android:id="@+id/tvSmsAfternoon"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="■ 최근 30일동안 시간대별 SMS 비율(오후)"
+        android:text="■ 최근 30일동안 시간대별 SMS 건수(오후)"
         android:textSize="18dp"
         android:textStyle="bold"
         android:layout_marginBottom="15dp"/>

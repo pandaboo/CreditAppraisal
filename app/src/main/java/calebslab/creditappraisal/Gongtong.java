@@ -38,7 +38,7 @@ public class Gongtong {
     }
 
     void setPieChart(PieChart pieChart, float[] yData, String[] xData) {
-        pieChart.setRotationEnabled(true); //회전 가능
+        pieChart.setRotationEnabled(false); //회전 가능
         pieChart.setHoleRadius(25f); //구멍크기
         pieChart.setTransparentCircleAlpha(0);
 
