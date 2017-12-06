@@ -202,6 +202,9 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
                 msg.setThreadId(String.valueOf(threadId));
 
                 String address = c.getString(2);
+                if(address.indexOf("+82") == 0) {       //국제번호로 저장된 CASE 컴버팅
+                    address = address.substring(3);
+                }
                 msg.setAddress(address);
 
                 long contactId = c.getLong(3);
