@@ -56,10 +56,14 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
             //최근 30일일간 일별 발신/수신 전화건수
             case R.id.btCallCount:
+                Intent btCallCount = new Intent(getApplicationContext(), CallHistoryCnt.class);
+                startActivity(btCallCount);
                 break;
 
             //발신/수신 전화의 월간 평균 통화시간
             case R.id.btCallAvgMonth:
+                Intent btCallAvgMonth = new Intent(getApplicationContext(), CallDurationCnt.class);
+                startActivity(btCallAvgMonth);
                 break;
 
             //신한은행 월간 입출금 총액

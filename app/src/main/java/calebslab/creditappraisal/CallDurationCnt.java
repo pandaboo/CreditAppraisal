@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.provider.CallLog;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -17,6 +18,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -24,26 +26,41 @@ import java.util.TreeMap;
 
 public class CallDurationCnt extends AppCompatActivity {
 
+    //조회 지정일 계산을 위한 format
     final SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMM");
+    //텍스트뷰 표시를 위한 format
+
     Gongtong gt = new Gongtong();
-    Long qDate = gt.getAgoDate(4);
     HashMap<String,Call> callLogHashMap = new HashMap<>();
 
-    String mDate1 = gt.getMonthAgoDate(4);
-    String mDate2 = gt.getMonthAgoDate(3);
-    String mDate3 = gt.getMonthAgoDate(2);
-    String mDate4 = gt.getMonthAgoDate(1);
+    //String mDate0 = gt.getMonthAgoDate(0);
+    String mDate1 = gt.getMonthAgoDate(3);
+    String mDate2 = gt.getMonthAgoDate(2);
+    String mDate3 = gt.getMonthAgoDate(1);
+
+    long maxDateLong = gt.getAgoMaxDate(1);
+    long minDateLong = gt.getAgoMinDate(4);
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.call_histroy);
+        setContentView(R.layout.call_duration_cnt);
+
+        ActionBar actionbar = getSupportActionBar();
+        gt.Title_Bar(actionbar);
 
         TextView toDate = findViewById(R.id.toDate);
-
+        //조회 기준일 세팅
         toDate.setText("조회 기준일 : " +gt.getDate());
 
-        Log.d("4달전 날짜 순서",mDate1+" "+ mDate2+" "+mDate3+" "+mDate4);
+        //지정일 종료날짜
+        String maxDate = dateFormat.format(maxDateLong);
+        Log.d("3달전 날짜 순서",mDate1+" "+ mDate2+" "+mDate3);
+        Log.d("지정일 종료날짜",maxDate);
+
+        //지정일 시작날짜
+        String minDate = dateFormat.format(minDateLong);
+        Log.d("지정일 시작일자",minDate);
 
         getCallLog();
 
@@ -108,17 +125,16 @@ public class CallDurationCnt extends AppCompatActivity {
             Cursor cursor = getContentResolver().query(
                     CallLog.Calls.CONTENT_URI,
                     projection
-                    ,"duration >= 0 AND date >= "+ qDate
+                    ,"duration >= 0 AND ("+ minDateLong +" <= date <= "+ maxDateLong+ ")"
                     ,null
                     ,null
 
             );
-
+            //통화시간을 저장할 객체를 미리 put
             callLogHashMap.put(mDate1,new Call(0,0,0,0));
             callLogHashMap.put(mDate2,new Call(0,0,0,0));
             callLogHashMap.put(mDate3,new Call(0,0,0,0));
-            callLogHashMap.put(mDate4,new Call(0,0,0,0));
-
+            //callLogHashMap.put(mDate0,new Call(0,0,0,0));
 
 
 
@@ -133,8 +149,8 @@ public class CallDurationCnt extends AppCompatActivity {
                     //columnIndex : 1 (수신) , 2 (발신)
 
                     Log.d("key",cdate);
-                    Log.d("duration",cursor.getString(2));
-
+                    Log.d("duration",cursor.getString(2)+"초");
+                    // type에 따른 switch 분기 ( 1: 수신 , 2: 발신 )로 통화시간 저장
                     switch (cursor.getInt(1)){
                         case 1:
                             if(cdate.equals(mDate1)){
@@ -145,9 +161,6 @@ public class CallDurationCnt extends AppCompatActivity {
                                 call.setInDuration(cursor.getInt(2));
                             }else if(cdate.equals(mDate3)) {
                                 Call call = callLogHashMap.get(mDate3);
-                                call.setInDuration(cursor.getInt(2));
-                            }else if(cdate.equals(mDate4)) {
-                                Call call = callLogHashMap.get(mDate4);
                                 call.setInDuration(cursor.getInt(2));
                             }
                             break;
@@ -161,10 +174,8 @@ public class CallDurationCnt extends AppCompatActivity {
                             }else if(cdate.equals(mDate3)) {
                                 Call call = callLogHashMap.get(mDate3);
                                 call.setOutDuration(cursor.getInt(2));
-                            }else if(cdate.equals(mDate4)) {
-                                Call call = callLogHashMap.get(mDate4);
-                                call.setOutDuration(cursor.getInt(2));
                             }
+
                             break;
                     }
 
@@ -181,42 +192,47 @@ public class CallDurationCnt extends AppCompatActivity {
             Iterator<String> treeMapIter = treeMap.keySet().iterator();
 
             while( treeMapIter.hasNext()) {
+                //키값을 저장
 
-                String key = treeMapIter.next();
-                int iValue = treeMap.get(key).getInDuration();
-                int oValue = treeMap.get(key).getOutDuration();
+                String keyDate = treeMapIter.next();
+                String yyyy = keyDate.substring(0,4);
+                String mm = keyDate.substring(4,6);
+                //yyyyMM 형식을 yyyy-MM 으로 변환
+                //초 단위 시간을 분으로 환산
+                int iValue = (treeMap.get(keyDate).getInDuration()% 3600)/60;
+                int oValue = (treeMap.get(keyDate).getOutDuration()% 3600)/60;
 
                 Log.d("start","----------------------------------------");
-                Log.d("key:",key);
-                Log.d("value","수신 :"+ iValue+",발신 :"+oValue);
+                Log.d("date",yyyy+"년 "+mm+"월");
+                Log.d("value","수신 시간 :"+ iValue+" 분, 발신 시간 :"+oValue+" 분");
 
-//                TableRow tableRow = new TableRow(this);
-//                TextView textView1 = new TextView(this);
-//                TextView textView2 = new TextView(this);
-//                TextView textView3= new TextView(this);
-//
-//                textView1.setBackgroundResource(R.drawable.border);
-//                textView2.setBackgroundResource(R.drawable.border);
-//                textView3.setBackgroundResource(R.drawable.border);
-//                textView1.setGravity(Gravity.CENTER);
-//                textView2.setGravity(Gravity.CENTER);
-//                textView3.setGravity(Gravity.CENTER);
-//
-//                textView1.setText(key);
-//                textView2.setText(Integer.toString(oValue)+"건");
-//                textView3.setText(Integer.toString(iValue)+"건");
-//
-//
-//                LinearLayout.LayoutParams tvPar = new TableRow.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
-//
-//                textView1.setLayoutParams(tvPar);
-//                textView2.setLayoutParams(tvPar);
-//                textView3.setLayoutParams(tvPar);
-//
-//                tableRow.addView(textView1);
-//                tableRow.addView(textView2);
-//                tableRow.addView(textView3);
-//                targetTable.addView(tableRow);
+                TableRow tableRow = new TableRow(this);
+                TextView textView1 = new TextView(this);
+                TextView textView2 = new TextView(this);
+                TextView textView3= new TextView(this);
+
+                textView1.setBackgroundResource(R.drawable.border);
+                textView2.setBackgroundResource(R.drawable.border);
+                textView3.setBackgroundResource(R.drawable.border);
+                textView1.setGravity(Gravity.CENTER);
+                textView2.setGravity(Gravity.CENTER);
+                textView3.setGravity(Gravity.CENTER);
+
+                textView1.setText(yyyy+"년 "+mm+"월");
+                textView2.setText(Integer.toString(oValue)+"분");
+                textView3.setText(Integer.toString(iValue)+"분");
+
+
+                LinearLayout.LayoutParams tvPar = new TableRow.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
+
+                textView1.setLayoutParams(tvPar);
+                textView2.setLayoutParams(tvPar);
+                textView3.setLayoutParams(tvPar);
+
+                tableRow.addView(textView1);
+                tableRow.addView(textView2);
+                tableRow.addView(textView3);
+                targetTable.addView(tableRow);
 
 
             }

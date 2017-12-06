@@ -9,7 +9,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="28dp"
-        android:text="발신/수신 전화 월간 평균 통화시"
+        android:text="발신/수신 전화 월간 평균 통화시간"
         android:textSize="20dp"
         android:gravity="center"
         />

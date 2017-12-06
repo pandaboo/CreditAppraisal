@@ -6,6 +6,7 @@ import android.database.Cursor;
 import android.provider.CallLog;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -33,6 +34,10 @@ public class CallHistoryCnt extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.call_histroy);
+
+        ActionBar actionbar = getSupportActionBar();
+        Gongtong gongtong = new Gongtong();
+        gongtong.Title_Bar(actionbar);
 
         TextView toDate = findViewById(R.id.toDate);
 
@@ -114,6 +119,7 @@ public class CallHistoryCnt extends AppCompatActivity {
 
                     String cdate = dateFormat.format(cursor.getLong(0));
                     //columnIndex : 1 (수신) , 2 (발신)
+
                     switch (cursor.getInt(1)){
                         case 1:
                             if(callLogHashMap.get(cdate)!= null){
@@ -156,8 +162,12 @@ public class CallHistoryCnt extends AppCompatActivity {
                 int iValue = treeMap.get(key).getInComing();
                 int oValue = treeMap.get(key).getOutGoing();
 
+                String yyyy = key.substring(0,4);
+                String mm = key.substring(5,7);
+                String dd = key.substring(9,10);
+
                 Log.d("start","----------------------------------------");
-                Log.d("key:",key);
+                Log.d("key:",yyyy+"년 "+mm+"월 "+dd+"일");
                 Log.d("value","수신 :"+ iValue+",발신 :"+oValue);
 
                 TableRow tableRow = new TableRow(this);
@@ -172,7 +182,7 @@ public class CallHistoryCnt extends AppCompatActivity {
                 textView2.setGravity(Gravity.CENTER);
                 textView3.setGravity(Gravity.CENTER);
 
-                textView1.setText(key);
+                textView1.setText(yyyy+"년 "+mm+"월 "+dd+"일");
                 textView2.setText(Integer.toString(oValue)+"건");
                 textView3.setText(Integer.toString(iValue)+"건");
 
