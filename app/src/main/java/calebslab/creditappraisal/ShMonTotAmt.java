@@ -141,7 +141,7 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
             viewHolder.inAmtTvHolder = (TextView) convertView.findViewById(R.id.inAmtTv);
             viewHolder.outAmtTvHolder = (TextView) convertView.findViewById(R.id.outAmtTv);
 
-            viewHolder.dateTvHolder.setText(dataArr.get(position).yyyymm.substring(0,4) + "년 " + dataArr.get(position).yyyymm.substring(4) + "월");
+            viewHolder.dateTvHolder.setText(dataArr.get(position).yyyymm.substring(0,4) + "-" + dataArr.get(position).yyyymm.substring(4));
             viewHolder.inAmtTvHolder.setText(String.format("%, d", dataArr.get(position).iInAmt) + " 원");
             viewHolder.outAmtTvHolder.setText(String.format("%,d", dataArr.get(position).iOutAmt) + "원");
 
@@ -214,6 +214,7 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
                 msg.setTimestamp(timestamp);
 
                 String body = c.getString(5);
+                //Log.d("cal", "body = "+ body);
                 msg.setBody(body);
 
                 int protocol = c.getInt(6);
