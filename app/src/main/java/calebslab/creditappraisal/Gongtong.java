@@ -243,9 +243,9 @@ public class Gongtong extends AppCompatActivity {
                             if(iTmpAmt > 0) {
                                 if (mapBankInOutData.get(sTmpYYYYMM) != null) {
                                     TmpBankOutData = mapBankInOutData.get(sTmpYYYYMM);
-                                    mapBankInOutData.put(sTmpYYYYMM,new BankInOutData(sTmpYYYYMM, TmpBankOutData.getInAmt() + iTmpAmt, TmpBankOutData.getOutAmt()));
+                                    mapBankInOutData.put(sTmpYYYYMM,new BankInOutData(sTmpYYYYMM, TmpBankOutData.getInAmt() , TmpBankOutData.getOutAmt()+ iTmpAmt));
                                 } else {
-                                    mapBankInOutData.put(sTmpYYYYMM,new BankInOutData(sTmpYYYYMM, iTmpAmt, 0));
+                                    mapBankInOutData.put(sTmpYYYYMM,new BankInOutData(sTmpYYYYMM,0, iTmpAmt));
                                 }
                                 break;
                             }
@@ -261,9 +261,9 @@ public class Gongtong extends AppCompatActivity {
                                 if(iTmpAmt > 0) {
                                     if (mapBankInOutData.get(sTmpYYYYMM) != null) {
                                         TmpBankOutData = mapBankInOutData.get(sTmpYYYYMM);
-                                        mapBankInOutData.put(sTmpYYYYMM, new BankInOutData(sTmpYYYYMM, TmpBankOutData.getInAmt(), TmpBankOutData.getOutAmt() + iTmpAmt));
+                                        mapBankInOutData.put(sTmpYYYYMM, new BankInOutData(sTmpYYYYMM, TmpBankOutData.getInAmt()+iTmpAmt, TmpBankOutData.getOutAmt()));
                                     } else {
-                                        mapBankInOutData.put(sTmpYYYYMM,new BankInOutData(sTmpYYYYMM, 0, iTmpAmt));
+                                        mapBankInOutData.put(sTmpYYYYMM,new BankInOutData(sTmpYYYYMM, iTmpAmt, 0));
                                     }
 
                                     iTmpAmt = 0;        //초기화
@@ -377,23 +377,23 @@ public class Gongtong extends AppCompatActivity {
         }
 
         if(arrayList.size() > 0 ) {
-            Log.d(JJKIM, "arrayList.size :"+arrayList.size());
-            for(int index=0; index<arrayList.size(); index++) {
-                Message messageOut = (Message) arrayList.get(index);
+                Log.d(JJKIM, "arrayList.size :"+arrayList.size());
+                for(int index=0; index<arrayList.size(); index++) {
+                    Message messageOut = (Message) arrayList.get(index);
 
-                Log.d(JJKIM, index + ". address       = " + messageOut.getAddress());
-                Log.d(JJKIM, index + ". date(거래시간)    = " + tFormat.format(messageOut.getTimestamp()));
+                    Log.d(JJKIM, index + ". address       = " + messageOut.getAddress());
+                    Log.d(JJKIM, index + ". date(거래시간)    = " + tFormat.format(messageOut.getTimestamp()));
 
-                String sSmsTime = tFormat.format(messageOut.getTimestamp());
+                    String sSmsTime = tFormat.format(messageOut.getTimestamp());
 
-                for(int i = startTime; i < endTime; i++) {
-                    if(Integer.parseInt(sSmsTime.substring(11,13)) == i){
-                        smsCount[i-startTime] += 1;
-                        Log.d(JJKIM, "Count++");
-                        break;
+                    for(int i = startTime; i < endTime; i++) {
+                        if(Integer.parseInt(sSmsTime.substring(11,13)) == i){
+                            smsCount[i-startTime] += 1;
+                            Log.d(JJKIM, "Count++");
+                            break;
+                        }
                     }
                 }
-            }
         }
         return smsCount;
     } // end of getSmsCount()
