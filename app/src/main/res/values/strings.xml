@@ -1,3 +1,7 @@
 <resources>
-    <string name="app_name">CalebsLab</string>
+    <string name="app_name">KCB-lenddo</string>
+    <string name="SMS_AMT_TERM">5</string>
+    <string name="SMS_NUM">01062848986,15778000</string>
+    <string name="IN_AMT_STR">입금</string>
+    <string name="OUT_AMT_STR">지급,출금</string>
 </resources>
