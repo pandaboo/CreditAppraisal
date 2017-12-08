@@ -30,6 +30,8 @@ public class SmsSndRecCnt extends AppCompatActivity implements View.OnClickListe
 
         findViewById(R.id.btEnd).setOnClickListener(this);
 
+
+
         getSmsCnt();
     }
 
