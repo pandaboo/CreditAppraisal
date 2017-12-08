@@ -11,7 +11,6 @@ import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -20,27 +19,22 @@ import android.widget.ListView;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListener {
 
     ListView listV;
-    SimpleDateFormat ymDateFormat = new SimpleDateFormat("yyyyMM");
+
     ArrayList arrayList = new ArrayList <Message> ();
     ArrayList<BankInOutData> dataArr = new ArrayList<>();
-
-    HashMap<String, Integer> hInMap = new HashMap<String, Integer>();
-    HashMap<String, Integer> hOutMap = new HashMap<String, Integer>();
-
-    HashMap<String, BankInOutData> hTestMap = new HashMap<String,  BankInOutData>();
-
+    HashMap<String, BankInOutData> mapBankInOutData = new HashMap<String,  BankInOutData>();
     Gongtong gongtong = new Gongtong();
 
-    String SHINHAN_NUM[] = null;
-    int IN_OUT_AMT_TERM = 0;
+    String SMS_NUM[] = null;
+    String IN_AMT_STR[] = null;
+    String OUT_AMT_STR[] = null;
+    int SMS_AMT_TERM = 0;
     int AGO_MONTH = 0;      // iAgoMonth 만큼 이전 달 (4달전)
 
 
@@ -61,21 +55,27 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
     private void init() {
 
         ActionBar actionbar = getSupportActionBar();
+        Gongtong gt = new Gongtong();
+        gt.Title_Bar(actionbar);
 
-        gongtong.Title_Bar(actionbar);
-        SHINHAN_NUM = gongtong.ReadToAssetsProperty(getApplicationContext().getAssets(), "SHINHAN_NUM", "code.properties");
-        IN_OUT_AMT_TERM = Integer.parseInt(gongtong.ReadToAssetsProperty(getApplicationContext().getAssets(), "IN_OUT_AMT_TERM", "code.properties")[0]);
-        AGO_MONTH = IN_OUT_AMT_TERM - 1;
-        dataArr.clear();
-
-        if(SHINHAN_NUM == null) {
+        SMS_NUM = getString(R.string.SMS_NUM).split(",");
+        if(SMS_NUM == null) {
             noData("은행 기본정보가 없어서 실행할 수 없습니다.");
         }
 
+
+        SMS_AMT_TERM = Integer.parseInt(getString(R.string.SMS_AMT_TERM).split(",")[0]);
+        AGO_MONTH = SMS_AMT_TERM - 1;
+
+        IN_AMT_STR = getString(R.string.IN_AMT_STR).split(",");
+        OUT_AMT_STR = getString(R.string.OUT_AMT_STR).split(",");
+
+        dataArr.clear();
+
         TextView textView1 = (TextView) findViewById(R.id.tvMain);
         TextView textView2 = (TextView) findViewById(R.id.dateTv);
-        textView1.setText("■ 최근 신한은행 " + IN_OUT_AMT_TERM + "달간 입/출금 총액");
-        textView2.setText("조회기준일 : " + gongtong.getDate());
+        textView1.setText("■ 최근 은행 " + SMS_AMT_TERM + "달간 입/출금 총액");
+        textView2.setText("조회기준일 : " + gt.getDate());
     }
 
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -202,6 +202,9 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
                 msg.setThreadId(String.valueOf(threadId));
 
                 String address = c.getString(2);
+                if(address.indexOf("+82") == 0) {       //국제번호로 저장된 CASE 컴버팅
+                    address = address.substring(3);
+                }
                 msg.setAddress(address);
 
                 long contactId = c.getLong(3);
@@ -214,7 +217,6 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
                 msg.setTimestamp(timestamp);
 
                 String body = c.getString(5);
-                //Log.d("cal", "body = "+ body);
                 msg.setBody(body);
 
                 int protocol = c.getInt(6);
@@ -227,77 +229,21 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
 
             }
 
+            //신한 데이터 SET
+            mapBankInOutData = gongtong.getBankInOutAmt(arrayList, SMS_NUM, IN_AMT_STR, OUT_AMT_STR);
 
-            int iTmpAmt = 0;
-            int iCnt = 0;
+            if(mapBankInOutData.isEmpty()) {
+                noData("은행에 대한 입출금 거래내역이 없어서 실행할 수 없습니다.");
+                return;
+            }
 
-            Log.d("cal", "arrayList.size()  = " + arrayList.size());
-
-            if(arrayList.size() > 0 ) {
-
-                for(int index=0; index<arrayList.size(); index++) {
-
-                    Message messageOut = (Message) arrayList.get(index);; // 따로 저는 클래스를 만들어서 담아오도록 했습니다.
-
-                    //입금 정보 확인해 보기
-                    if(messageOut.getType() == 1 && messageOut.getAddress() != null) {         //수신 메시지
-
-                        for(int ii=0; ii<SHINHAN_NUM.length; ii++) {
-
-                            if(SHINHAN_NUM[ii].equals(messageOut.getAddress())) {
-
-                                if(messageOut.getBody().indexOf("출금") > 0 || messageOut.getBody().indexOf("지급") > 0) {    //출금
-                                    iCnt++;
-                                    iTmpAmt = 0;
-                                    iTmpAmt = getAmt(messageOut.getBody(), "2");
-
-                                    BankInOutData bankOutData = null;
-                                    if(hTestMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) != null) {
-                                        bankOutData = hTestMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString());
-                                        hTestMap.put(ymDateFormat.format(messageOut.getTimestamp()).toString(), new BankInOutData (ymDateFormat.format(messageOut.getTimestamp()).toString(), bankOutData.getInAmt(), bankOutData.getOutAmt()+ iTmpAmt) );
-                                    } else {
-                                        hTestMap.put(ymDateFormat.format(messageOut.getTimestamp()).toString(), new BankInOutData (ymDateFormat.format(messageOut.getTimestamp()).toString(), 0, iTmpAmt));
-                                    }
-
-                                    Log.d("cal", "출금 messageOut.getTimestamp()).toString()  =" + ymDateFormat.format(messageOut.getTimestamp()).toString() );
-                                    Log.d("cal", "출금 hOutMap  = " + hOutMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) );
-
-                                } else if(messageOut.getBody().indexOf("입금") > 0) {  // 입금
-                                    iCnt++;
-                                    iTmpAmt = 0;
-                                    iTmpAmt = getAmt(messageOut.getBody(), "1");
-
-                                    BankInOutData bankOutData = null;
-                                    if(hTestMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) != null) {
-                                        bankOutData = hTestMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString());
-                                        hTestMap.put(ymDateFormat.format(messageOut.getTimestamp()).toString(), new BankInOutData (ymDateFormat.format(messageOut.getTimestamp()).toString(), bankOutData.getInAmt() + iTmpAmt, bankOutData.getOutAmt()));
-                                    } else {
-                                        hTestMap.put(ymDateFormat.format(messageOut.getTimestamp()).toString(), new BankInOutData (ymDateFormat.format(messageOut.getTimestamp()).toString(), iTmpAmt, 0));
-                                    }
-
-                                    Log.d("cal", "입금 messageOut.getTimestamp()).toString()  =" + ymDateFormat.format(messageOut.getTimestamp()).toString() );
-                                    Log.d("cal", "입금 hInMap  = " + hInMap.get(ymDateFormat.format(messageOut.getTimestamp()).toString()) );
-                                }
-                            } else {
-
-                            }
-                        }
-                    }
-                }
-
-                if(iCnt == 0 ) {
-                    noData("은행에 대한 입출금 거래내역이 없어서 실행할 수 없습니다.");
-                    return;
-                }
-
-                // Adapter에 데이터를 Set 하기 위해서 arrayList에 입출금 내역이 저장된 class를 매핑해줌.
-                for (int idx = 0; idx<IN_OUT_AMT_TERM; idx++) {
-                    String sSetYearMonth = gongtong.getMonthAgoDate(idx);
-                    if(hTestMap.get(sSetYearMonth) == null) {
-                        dataArr.add(new BankInOutData(sSetYearMonth, 0, 0));
-                    } else {
-                        dataArr.add(hTestMap.get(sSetYearMonth));
-                    }
+            // Adapter에 데이터를 Set 하기 위해서 arrayList에 입출금 내역이 저장된 class를 매핑해줌.
+            for (int idx = 0; idx<SMS_AMT_TERM; idx++) {
+                String sSetYearMonth = gongtong.getMonthAgoDate(idx);
+                if(mapBankInOutData.get(sSetYearMonth) == null) {
+                    dataArr.add(new BankInOutData(sSetYearMonth, 0, 0));
+                } else {
+                    dataArr.add(mapBankInOutData.get(sSetYearMonth));
                 }
             }
         }
@@ -310,47 +256,4 @@ public class ShMonTotAmt extends AppCompatActivity implements View.OnClickListen
         Toast.makeText(getApplicationContext(), msg, Toast.LENGTH_SHORT).show();
         finish();
     }
-
-    /**
-     *
-     * @param body      : 문자메시지 본문
-     * @param checkDsc : 1:입금, 2:출금
-     * @return Amt
-     */
-    private int getAmt(String body, String checkDsc) {
-
-        int iTmpIndexStart = 0;
-        int iTmpIndexEnd   = 0;
-        int amt     = 0;
-
-        String [] arrayStr = {"입금", "출금", "지급"};
-
-        String sTmpBody = "";
-        String sChkStr  = "";
-
-        // 체크문자 세팅
-        if("1".equals(checkDsc)) {              //입금금액 추출
-            sChkStr = arrayStr[0];
-        } else if ("2".equals(checkDsc)) {      //출금금액 추출
-            if(body.indexOf(arrayStr[1]) > 0) {
-                sChkStr = arrayStr[1];
-            } else if(body.indexOf(arrayStr[2]) > 0) {
-                sChkStr = arrayStr[2];
-            }
-        }
-
-        // 금액 추출
-        if(!"".equals(sChkStr)) {
-            iTmpIndexStart = body.indexOf(sChkStr);
-            sTmpBody = body.substring(iTmpIndexStart + sChkStr.length());
-            iTmpIndexEnd = sTmpBody.indexOf("원");
-
-            if(gongtong.isOnlyDigitChk(sTmpBody.substring(0, iTmpIndexEnd).replace(",", "").trim())){
-                amt = Integer.parseInt(sTmpBody.substring(0, iTmpIndexEnd).replace(",", "").trim());
-            }
-        }
-        return amt;
-    }
-
-
 }

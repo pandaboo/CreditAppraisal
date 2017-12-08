@@ -11,6 +11,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -33,18 +36,29 @@ public class CallHistoryCnt extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.call_histroy_cnt);
 
+        //액션바 설정
         ActionBar actionbar = getSupportActionBar();
         gt.Title_Bar(actionbar);
 
+        //조회 기준일 세팅
         TextView toDate = findViewById(R.id.toDate);
-
         Log.d("날짜체크",gt.getMonthAgoDate(4));
-
         toDate.setText("조회 기준일 : " +gt.getDate());
 
         getCallLog();
+
+        //목록보기 버튼 동작설정
+        Button finish = findViewById(R.id.btEnd);
+        finish.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+
 
     }
 
@@ -94,8 +108,6 @@ public class CallHistoryCnt extends AppCompatActivity {
                     CallLog.Calls.DATE,
                     CallLog.Calls.TYPE
 
-                    //통화가 발생한 날짜
-
             };
 
             // 통화시간이 30초이상 , 최근 30일간의 통화내역 조회
@@ -107,6 +119,7 @@ public class CallHistoryCnt extends AppCompatActivity {
                     , null
 
             );
+
             // 권한이 존재하면 통화내역을 타입별로 구분하여 callHashMap 에 저장
             if (cursor == null || cursor.getCount() == 0) {
                 Log.d("oh", "권한이 없음");
@@ -114,9 +127,12 @@ public class CallHistoryCnt extends AppCompatActivity {
                 cursor.moveToFirst();
                 while (!cursor.isAfterLast()) {
 
+                    //columnIndex : 0 (날짜) , 1 (수신) , 2 (발신)
+                    //long 타입 형식의 날짜를 포맷 변경 (yyyy-MM-dd)
                     String cdate = dateFormat.format(cursor.getLong(0));
-                    //columnIndex : 1 (수신) , 2 (발신)
 
+
+                    // type에 따른 switch 분기 ( 1: 수신 , 2: 발신 ), 날짜를 키값으로 하여 통화내역 저장
                     switch (cursor.getInt(1)) {
                         case 1:
                             if (callLogHashMap.get(cdate) != null) {
@@ -155,9 +171,9 @@ public class CallHistoryCnt extends AppCompatActivity {
             if (treeMapIter.hasNext() ==true) {
                 while (treeMapIter.hasNext()) {
 
-                    String key = treeMapIter.next();
-                    int iValue = treeMap.get(key).getInComing();
-                    int oValue = treeMap.get(key).getOutGoing();
+                    String key = treeMapIter.next(); // 통화 날짜
+                    int iValue = treeMap.get(key).getInComing();// 수신 내역
+                    int oValue = treeMap.get(key).getOutGoing();// 발신 내역
 
                     Log.d("start", "----------------------------------------");
                     Log.d("value", "수신 :" + iValue + ",발신 :" + oValue);
@@ -178,13 +194,11 @@ public class CallHistoryCnt extends AppCompatActivity {
                     textView2.setText(Integer.toString(oValue) + "건");
                     textView3.setText(Integer.toString(iValue) + "건");
 
-
                     LinearLayout.LayoutParams tvPar = new TableRow.LayoutParams(0, LinearLayout.LayoutParams.WRAP_CONTENT, 1f);
 
                     textView1.setLayoutParams(tvPar);
                     textView2.setLayoutParams(tvPar);
                     textView3.setLayoutParams(tvPar);
-
 
                     tableRow.addView(textView1);
                     tableRow.addView(textView2);

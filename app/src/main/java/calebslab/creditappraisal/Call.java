@@ -14,6 +14,13 @@ public class Call {
     private int inDuration;
     private int outDuration;
 
+    public Call(int inComing, int outGoing, int inDuration, int outDuration) {
+        this.inComing = inComing;
+        this.outGoing = outGoing;
+        this.inDuration = inDuration;
+        this.outDuration = outDuration;
+    }
+
     public int getInDuration() {
         return inDuration;
     }
@@ -28,13 +35,6 @@ public class Call {
 
     public void setOutDuration(int outDuration) {
         this.outDuration += outDuration;
-    }
-
-    public Call(int inComing, int outGoing, int inDuration, int outDuration) {
-        this.inComing = inComing;
-        this.outGoing = outGoing;
-        this.inDuration = inDuration;
-        this.outDuration = outDuration;
     }
 
     public int getInComing() {

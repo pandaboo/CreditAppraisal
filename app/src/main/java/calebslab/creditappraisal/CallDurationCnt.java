@@ -11,6 +11,9 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.Gravity;
+import android.view.View;
+import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.LinearLayout;
 import android.widget.TableLayout;
 import android.widget.TableRow;
@@ -18,7 +21,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import java.text.SimpleDateFormat;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.TreeMap;
@@ -33,7 +35,6 @@ public class CallDurationCnt extends AppCompatActivity {
     Gongtong gt = new Gongtong();
     HashMap<String,Call> callLogHashMap = new HashMap<>();
 
-    //String mDate0 = gt.getMonthAgoDate(0);
     String mDate1 = gt.getMonthAgoDate(3);
     String mDate2 = gt.getMonthAgoDate(2);
     String mDate3 = gt.getMonthAgoDate(1);
@@ -44,18 +45,21 @@ public class CallDurationCnt extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.call_duration_cnt);
 
+        //액션바 설정
         ActionBar actionbar = getSupportActionBar();
         gt.Title_Bar(actionbar);
 
-        TextView toDate = findViewById(R.id.toDate);
         //조회 기준일 세팅
+        TextView toDate = findViewById(R.id.toDate);
         toDate.setText("조회 기준일 : " +gt.getDate());
+
+        Log.d("3달전 날짜 순서",mDate1+" "+ mDate2+" "+mDate3);
 
         //지정일 종료날짜
         String maxDate = dateFormat.format(maxDateLong);
-        Log.d("3달전 날짜 순서",mDate1+" "+ mDate2+" "+mDate3);
         Log.d("지정일 종료날짜",maxDate);
 
         //지정일 시작날짜
@@ -64,8 +68,18 @@ public class CallDurationCnt extends AppCompatActivity {
 
         getCallLog();
 
+        //목록보기 버튼 동작 설정
+        Button finish = findViewById(R.id.btEnd);
+        finish.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
 
     }
+
+
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
@@ -114,14 +128,11 @@ public class CallDurationCnt extends AppCompatActivity {
                     CallLog.Calls.TYPE,
                     CallLog.Calls.DURATION
 
-                    //통화가 발생한 날짜
+
 
             };
 
-            // 통화시간이 30초이상 , 최근 30일간의 통화내역 조회
-            // * duration : 통화시간 (초)
-            // * date : 통화가 발생한 날짜 (yyyy-MM-dd)\
-            // * strDate2 : 현재일자로부터 30일 이전 날짜 (조회 시작 기준일)
+            // 통화시간이 30초이상 , 지난 3개월 간 데이터 통화시간 조회
             Cursor cursor = getContentResolver().query(
                     CallLog.Calls.CONTENT_URI,
                     projection
@@ -130,6 +141,7 @@ public class CallDurationCnt extends AppCompatActivity {
                     ,null
 
             );
+
             //통화시간을 저장할 객체를 미리 put
             callLogHashMap.put(mDate1,new Call(0,0,0,0));
             callLogHashMap.put(mDate2,new Call(0,0,0,0));
@@ -146,11 +158,12 @@ public class CallDurationCnt extends AppCompatActivity {
                 while (!cursor.isAfterLast()) {
 
                     String cdate = dateFormat.format(cursor.getLong(0));
-                    //columnIndex : 1 (수신) , 2 (발신)
+                    //columnIndex : 0 (날짜) , 1 (수신) , 2 (발신)
 
                     Log.d("key",cdate);
                     Log.d("duration",cursor.getString(2)+"초");
-                    // type에 따른 switch 분기 ( 1: 수신 , 2: 발신 )로 통화시간 저장
+
+                    // type에 따른 switch 분기 ( 1: 수신 , 2: 발신 ), 날짜를 키값으로 하여 통화시간 저장
                     switch (cursor.getInt(1)){
                         case 1:
                             if(cdate.equals(mDate1)){
@@ -205,7 +218,6 @@ public class CallDurationCnt extends AppCompatActivity {
                 int oValue = (treeMap.get(keyDate).getOutDuration()% 3600)/60;
 
                 Log.d("start","----------------------------------------");
-//                Log.d("date",yyyy+"년 "+mm+"월");
                 Log.d("value","수신 시간 :"+ iValue+" 분, 발신 시간 :"+oValue+" 분");
 
                 TableRow tableRow = new TableRow(this);
