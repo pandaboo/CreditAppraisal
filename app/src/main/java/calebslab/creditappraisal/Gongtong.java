@@ -31,9 +31,7 @@ import java.util.Properties;
 
 
 public class Gongtong extends AppCompatActivity {
-    public Gongtong() {
-
-    }
+    public Gongtong() {}
     int startTm = 0;
     int endTm = 0;
 
